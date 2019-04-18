@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
-import { map } from 'rxjs/operator/map';
 import { Router } from '@angular/router';
 
 export interface UserDetails {
@@ -21,9 +20,6 @@ export interface TokenPayload {
   password: string;
   name?: string;
 }
-
-// Added the comment to check
-
 @Injectable({
   providedIn: 'root'
 })
@@ -79,25 +75,37 @@ export class AuthenticationService {
     }
   }
 
-  private request(method: string, type: string, user: TokenPayload): Observable<any> {
-    let base;
+  private request(method: 'post'|'get', type: 'login'|'register'|'profile', user?: TokenPayload): Observable<any> {
+    let base: any;
 
     if (method === 'post') {
       base = this.http.post(`/api/${type}`, user);
     } else {
-      base = this.http.get(`/api/${type}`, { headers: { Authorization: `Bearer: ${this.getToken()}` } });
+      base = this.http.get(`/api/${type}`, { headers: { Authorization: `Bearer ${this.getToken()}` }});
     }
 
-    const request = base.pipe( map( (data: TokenResponse) => {
-
-      if (data.token) {
-        this.saveToken(data.token);
+    const requestData = base.pipe(
+      (data: TokenResponse) => {
+        if (data.token) {
+          this.saveToken(data.token);
+        }
+        return data;
       }
+    );
 
-      return data;
-    }));
+    return requestData;
+  }
 
-    return request;
+  public register(user: TokenPayload): Observable<any> {
+    return this.request('post', 'register', user);
+  }
+
+  public login(user: TokenPayload): Observable<any> {
+    return this.request('post', 'login', user);
+  }
+
+  public profile(): Observable<any> {
+    return this.request('get', 'profile');
   }
 
 }
