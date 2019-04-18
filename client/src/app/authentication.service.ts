@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import { Router } from '@angular/router';
+import { environment } from '../environments/environment';
 
 export interface UserDetails {
   _id: string;
@@ -20,6 +21,8 @@ export interface TokenPayload {
   password: string;
   name?: string;
 }
+
+const API_URL = environment.apiUrl;
 @Injectable({
   providedIn: 'root'
 })
@@ -79,9 +82,9 @@ export class AuthenticationService {
     let base: any;
 
     if (method === 'post') {
-      base = this.http.post(`/api/${type}`, user);
+      base = this.http.post(`${API_URL}/api/${type}`, user);
     } else {
-      base = this.http.get(`/api/${type}`, { headers: { Authorization: `Bearer ${this.getToken()}` }});
+      base = this.http.get(`${API_URL}/api/${type}`, { headers: { Authorization: `Bearer ${this.getToken()}` }});
     }
 
     const requestData = base.pipe(
